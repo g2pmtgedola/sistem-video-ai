@@ -148,7 +148,10 @@ export function StoryboardModule({ project, onUpdateProject, showToast }) {
                         {scene.title}
                       </h4>
                       <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: 2 }}>
-                        {scene.location} • Watak: <strong>{(scene.charactersPresent || []).join(", ")}</strong>
+                        {scene.location} • Watak: <strong>{(scene.charactersPresent || []).map(id => {
+                          const c = characters.find(char => char.id === id);
+                          return c ? c.name : id;
+                        }).join(", ")}</strong>
                       </div>
                     </div>
                   </div>

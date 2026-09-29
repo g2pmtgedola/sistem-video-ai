@@ -163,9 +163,46 @@ export function DashboardModule({
             </div>
           </div>
 
-          <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "20px", fontStyle: "italic", background: "#f8fafc", padding: "12px 16px", borderRadius: "var(--radius-md)", borderLeft: "3px solid #cbd5e1" }}>
+          <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "16px", fontStyle: "italic", background: "#f8fafc", padding: "12px 16px", borderRadius: "var(--radius-md)", borderLeft: "3px solid #cbd5e1" }}>
             &ldquo;{project.idea}&rdquo;
           </p>
+
+          {project.story && (
+            <div style={{ background: "rgba(99, 102, 241, 0.04)", border: "1px solid rgba(99, 102, 241, 0.15)", borderRadius: "var(--radius-md)", padding: "14px 18px", marginBottom: "20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--color-primary-dark)", textTransform: "uppercase" }}>
+                  Konsep Naratif & Jalan Cerita (Dashboard Penceritaan)
+                </span>
+                <span className="badge badge-secondary" style={{ fontSize: "0.7rem" }}>
+                  {project.story.genre || "Drama Sinematik"}
+                </span>
+              </div>
+              <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "4px" }}>
+                {project.story.title}
+              </div>
+              <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "8px" }}>
+                {project.story.logline}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid rgba(99, 102, 241, 0.1)" }}>
+                <div>
+                  <strong style={{ fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", display: "block" }}>Permulaan:</strong>
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-primary)" }}>{project.story.beginning}</span>
+                </div>
+                <div>
+                  <strong style={{ fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", display: "block" }}>Konflik / Ujian:</strong>
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-primary)" }}>{project.story.middle || project.story.mainConflict}</span>
+                </div>
+                <div>
+                  <strong style={{ fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", display: "block" }}>Kemuncak:</strong>
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-primary)" }}>{project.story.climax}</span>
+                </div>
+                <div>
+                  <strong style={{ fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", display: "block" }}>Peleraian & Kejayaan:</strong>
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-primary)" }}>{project.story.ending}</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick Module Jump Links */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px" }}>

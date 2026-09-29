@@ -1,6 +1,8 @@
 // AI Consistency & Quality Control Checker for Master AI Video Prompt Studio
 // Performs an automated 13-point audit and provides automatic fixing for discrepancies
 
+import { promptBuilder } from "./promptBuilder.js";
+
 export const consistencyChecker = {
   runAudit(project) {
     if (!project) {
@@ -265,7 +267,7 @@ export const consistencyChecker = {
       characters[0].age = 22;
       characters[0].role = isBatik ? "Gadis Kampung & Pewaris Perniagaan Batik" : "Gadis Protagonis Utama";
       characters[0].faceDescription = "Youthful warm honey-tan complexion, gentle expressive dark brown eyes holding vulnerability and emerging resolve.";
-      characters[0].lockedDescription = "A 22-year-old Malay Malaysian village woman named Suraya, slender graceful build, warm honey-tan complexion with gentle expressive dark brown eyes, wearing a modest dusty-rose cotton Baju Kurung with rolled sleeves, dark navy sarong skirt, and a soft matching shawl, holding an aged handwritten letter and a traditional brass canting.";
+      characters[0].lockedDescription = "A 22-year-old Malay Malaysian village woman named Suraya, poised graceful posture, warm honey-tan complexion with gentle expressive dark brown eyes, wearing a modest dusty-rose cotton Baju Kurung with rolled sleeves, dark navy sarong skirt, and a soft matching shawl, holding an aged handwritten letter and a traditional brass canting.";
       characters[0].isLocked = true;
     }
 
@@ -302,12 +304,12 @@ export const consistencyChecker = {
 
         if (presentCharObjects.length > 0) {
           const charLockedStrings = presentCharObjects.map(
-            (c) => `[${c.id}: ${c.name}, ${c.lockedDescription}]`
+            (c) => promptBuilder.sanitizeForPolicy(`${c.name} (${c.lockedDescription})`)
           );
 
           // If prompt doesn't contain character description, enhance it
           if (!scene.imagePrompt.includes(presentCharObjects[0].name)) {
-            scene.imagePrompt = `Cinematic ${scene.camera?.shotType || "Medium Shot"} featuring ${charLockedStrings.join(" and ")}. ${scene.action} Facial expression: ${scene.emotion}. Environment: ${scene.environment}. Lighting: ${scene.lighting}. Camera: ${scene.camera?.shotType || "Medium Shot"}, lens ${scene.camera?.lens || "50mm"}. Visual style: ${fixed.visualStyle || "Photorealistic Cinematic"}, 8k resolution, aspect ratio ${fixed.aspectRatio || "16:9"}.`;
+            scene.imagePrompt = `Cinematic ${scene.camera?.shotType || "Medium Shot"} featuring ${charLockedStrings.join(" and ")}. ${promptBuilder.sanitizeForPolicy(scene.action)} Facial expression: ${promptBuilder.sanitizeForPolicy(scene.emotion)}. Environment: ${promptBuilder.sanitizeForPolicy(scene.environment)}. Lighting: ${promptBuilder.sanitizeForPolicy(scene.lighting)}. Camera: ${scene.camera?.shotType || "Medium Shot"}, lens ${scene.camera?.lens || "50mm"}. Visual style: ${fixed.visualStyle || "Photorealistic Cinematic"}, natural cinematic lighting, professional photographic quality, aspect ratio ${fixed.aspectRatio || "16:9"}.`;
           }
 
           // Ensure video prompt has negative instructions

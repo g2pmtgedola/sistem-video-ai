@@ -274,6 +274,7 @@ export const aiService = {
   // Intelligent Rule-Based Project Synthesizer
   synthesizeProject(params) {
     const analysis = this.analyzeIdeaContext(params.idea, params);
+    const { isMalay } = analysis;
     const domainPkg = buildDomainPackage(analysis, params);
     const {
       characters,
@@ -444,7 +445,7 @@ export const aiService = {
         cameraMovement: sceneActionData.cam.movement,
         cameraAngle: sceneActionData.cam.shotType,
         lighting: dynamicLighting,
-        cinematicStyle: `${params.visualStyle} 4k masterwork`
+        cinematicStyle: `${params.visualStyle}, natural cinematic lighting, professional photographic quality 24fps`
       });
 
       const voPrompt = promptBuilder.buildVoicePrompt({

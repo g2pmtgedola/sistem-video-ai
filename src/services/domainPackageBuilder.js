@@ -139,7 +139,7 @@ export function buildDomainPackage(analysis, params) {
         movementStyle: "Bergerak pantas dan senyap seperti bayang",
         backstory: "Penggodam bayang yang menguasai seni menghapuskan jejak digital; meninggalkan teka-teki terancang untuk menguji detektif pilihan hatinya.",
         isLocked: true,
-        lockedDescription: "A shadowy 30-year-old cyber hacker Karberos in a dark hooded jacket with face obscured in terminal glow, typing rapidly on portable cyber deck, enigmatic and elusive presence."
+        lockedDescription: "A shadowy 30-year-old enigmatic digital operative named Karberos in a dark hooded jacket with face obscured in terminal glow, typing rapidly on portable cyber deck, enigmatic and elusive presence."
       });
     }
 
@@ -271,7 +271,7 @@ export function buildDomainPackage(analysis, params) {
       hair: "Long natural black hair neatly gathered under a modest shawl",
       hairStyle: "Modest, graceful arrangement with a few wisps framing the face",
       eyeColor: "Deep warm dark brown, thoughtful and emotionally resonant",
-      bodyType: "Slender, graceful build with artisan poise",
+      bodyType: "Natural composed posture with artisan poise",
       height: "163 cm",
       clothing: "A modest dusty-rose cotton Baju Kurung with sleeves rolled up to the mid-forearms for batik working, dark navy sarong skirt, and a soft matching chiffon shawl",
       shoes: "Simple brown leather traditional slip-on flat sandals",
@@ -285,7 +285,7 @@ export function buildDomainPackage(analysis, params) {
       movementStyle: "Graceful, deliberate, mindful of the delicate silk fabric",
       backstory: "Seorang gadis kampung yang mulanya ragu-ragu akan masa depan perniagaan batik peninggalan arwah ayahnya di era moden. Namun sekeping surat tulisan tangan arwah ayahnya yang ditemui di bengkel telah membuka mata hatinya tentang makna sebenar seni batik sebagai doa dan warisan pusaka.",
       isLocked: true,
-      lockedDescription: `A ${charAge}-year-old Malay Malaysian village woman named ${charName}, slender graceful build, warm honey-tan complexion with gentle expressive dark brown eyes, wearing a modest dusty-rose cotton Baju Kurung with rolled sleeves, dark navy sarong skirt, and a soft matching shawl, holding an aged handwritten letter and a traditional brass canting.`
+      lockedDescription: `A ${charAge}-year-old Malay Malaysian village woman named ${charName}, composed poise, warm honey-tan complexion with gentle expressive dark brown eyes, wearing a modest dusty-rose cotton Baju Kurung with rolled sleeves, dark navy sarong skirt, and a soft matching shawl, holding an aged handwritten letter and a traditional brass canting.`
     });
 
     characters.push({
@@ -621,7 +621,7 @@ export function buildDomainPackage(analysis, params) {
       hair: isFemale ? "Neat black hair tucked neatly under a white school tudung" : "Neat short school-regulation dark black hair",
       hairStyle: isFemale ? "Neat school headscarf" : "Short regulation school haircut",
       eyeColor: "Deep expressive dark brown",
-      bodyType: "Youthful slender teenage build",
+      bodyType: "Natural neat student posture",
       height: isFemale ? "154 cm" : "165 cm",
       clothing: schoolClothing,
       shoes: schoolShoes,
@@ -1304,7 +1304,7 @@ export function buildDomainPackage(analysis, params) {
         emotion: "Fokus mutlak",
         cam: { shotType: "Extreme Close-Up", lens: "100mm Macro f/2.8", movement: "Intense Eye Focus" },
         narration: "Seluruh stadium seakan membisu; hanya degup jantung sendiri yang bergema membilang saat.",
-        sfx: [{ name: "Keheningan stadium & tembakan pistol pelepas berdentum", volume: "75%", purpose: "Detik permulaan perlumbaan sukan berprestij" }],
+        sfx: [{ name: "Keheningan stadium & isyarat hon pelepas berbunyi", volume: "75%", purpose: "Detik permulaan perlumbaan sukan berprestij" }],
         musicCue: "Irama hening yang tiba-tiba meledak penuh kuasa"
       },
       {
@@ -1393,7 +1393,7 @@ export function buildDomainPackage(analysis, params) {
         hair: "Rambut dan janggut putih keperakan",
         hairStyle: "Diselimuti serban putih ringkas atau tanjak tua",
         eyeColor: "Warm spiritual dark brown, piercingly perceptive",
-        bodyType: "Slender yet firmly rooted and resilient frame",
+        bodyType: "Grounded athletic warrior posture",
         height: "168 cm",
         clothing: "Baju kurung cekak musang putih gading lusuh bersopan, kain sarung tenun lama, dan serban ringkas",
         shoes: "Capal kulit tradisional Melayu",
@@ -1694,7 +1694,7 @@ export function buildDomainPackage(analysis, params) {
       movementStyle: "Poised, steady dan yakin",
       backstory: `Watak utama yang mengharungi liku-liku cabaran penceritaan berpandukan situasi: "${idea}".`,
       isLocked: true,
-      lockedDescription: `A ${charAge}-year-old ${charGender.toLowerCase()} Malaysian named ${charName}, ${charGender === "Female" ? "slender graceful build, expressive dark brown eyes, wearing modern modest attire" : "medium athletic build, structured jawline, wearing casual smart clothing"}.`
+      lockedDescription: `A ${charAge}-year-old ${charGender.toLowerCase()} Malaysian named ${charName}, ${charGender === "Female" ? "composed poise, expressive dark brown eyes, wearing modern modest attire" : "medium athletic build, structured jawline, wearing casual smart clothing"}.`
     });
 
     soundDesign = {
