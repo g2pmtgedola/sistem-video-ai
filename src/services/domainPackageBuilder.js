@@ -2,6 +2,8 @@
 // Intelligently generates characters, story concepts, narrative arcs, and per-scene scripts
 // for any user-provided situation, completely free of hardcoded craft/heritage biases.
 
+import { buildNarrativeArc } from "./narrativeArcBuilder.js";
+
 export function buildDomainPackage(analysis, params) {
   const {
     domain,
@@ -19,7 +21,9 @@ export function buildDomainPackage(analysis, params) {
   // 1. Determine Lead Character Name
   let charName = extractedName;
   if (!charName) {
-    if (domain === "BATIK") {
+    if (domain === "INVESTIGATION") {
+      charName = isFemale ? "Detektif Maya" : "Detektif Kamal";
+    } else if (domain === "BATIK") {
       charName = isFemale ? "Suraya" : "Amir";
     } else if (domain === "UKIRAN") {
       charName = "Amir";
@@ -49,6 +53,7 @@ export function buildDomainPackage(analysis, params) {
   const charGender = isFemale ? "Female" : "Male";
   let charAge = extractedAge || (isFemale ? 22 : 25);
   if (domain === "STUDENT" && !extractedAge) charAge = 15;
+  if (domain === "INVESTIGATION" && !extractedAge) charAge = 34;
 
   let characters = [];
   let locationName = "";
@@ -58,9 +63,190 @@ export function buildDomainPackage(analysis, params) {
   let craftSceneActions = [];
 
   // =========================================================================
-  // DOMAIN 1: BATIK (Seni Batik Tradisional & Wasiat Ayah)
+  // DOMAIN 0: INVESTIGATION (Siasatan Jenayah, Detektif, Serangan Siber dan Konspirasi)
   // =========================================================================
-  if (domain === "BATIK") {
+  if (domain === "INVESTIGATION") {
+    locationName = isMalay ? "Bilik Gerakan Siasatan Jenayah Siber dan Ibu Pejabat Polis" : "Cyber Crime Investigation Command Center & Police HQ";
+    activeProps = [
+      "Papan bukti siasatan dengan benang merah menghubungkan suspek",
+      "Komputer riba forensik dengan barisan kod terminal keselamatan hijau",
+      "Lencana detektif polis bersalut perak dan radio taktikal",
+      "Pemacu pena (USB drive) data rahsia bersulit simbol Karberos",
+      "Cawan kopi seramik sejuk di atas timbunan fail sulit projek"
+    ];
+
+    characters.push({
+      id: "CHAR_001",
+      name: charName,
+      role: isMalay ? "Pegawai Penyiasat Kanan dan Detektif Siber" : "Senior Cyber Crime Detective",
+      age: charAge,
+      gender: charGender,
+      nationality: "Malaysian",
+      ethnicity: "Malay",
+      faceDescription: isFemale
+        ? "Raut wajah tajam analitikal dengan pandangan mata fokus yang tidak mudah gentar, riak wajah tenang penuh kewaspadaan."
+        : "Raut wajah tegas dengan pandangan mata tajam analitikal, kesan keletihan berkejaran malam, rahang berstruktur dengan keperibadian penyiasat berwibawa.",
+      skinTone: "Warm natural Asian tan skin",
+      hair: isFemale ? "Rambut hitam kemas di sebalik tudung bawal gelap ringkas" : "Rambut hitam pendek kemas gaya pegawai penyiasat",
+      hairStyle: "Professional neat grooming",
+      eyeColor: "Deep focused dark brown with sharp piercing analytical gaze",
+      bodyType: "Athletic, alert and tactical posture ready for sudden movement",
+      height: isFemale ? "165 cm" : "178 cm",
+      clothing: isFemale
+        ? "Kemeja taktikal biru gelap, seluar kargo hitam kemas, jaket windbreaker siasatan berpoket dalam, sarung lencana polis"
+        : "Kemeja lengan panjang biru firus gelap berbutang yang dilipat ke siku, tali leher dilonggarkan, seluar taktikal gelap, jaket kasual siasatan polis, sarung lencana di pinggang",
+      shoes: "Kasut but taktikal kulit hitam tahan lasak",
+      accessories: "Jam tangan taktikal digital berselaput calar dan telefon pintar bersulitan selamat",
+      personality: "Teliti, tajam naluri penyiasatan, tenang di bawah tekanan, tidak mudah mempercayai bukti permukaan, berpegang teguh pada integriti",
+      emotionalTraits: "Tenang, berwaspada, berhati-hati namun berani mengambil risiko demi menegakkan kebenaran",
+      voiceCharacteristics: isFemale
+        ? "Suara wanita tenang, tegas dan bernada yakin dengan artikulasi tepat (0.95x)"
+        : "Suara lelaki garau terkawal, tegas dan berwibawa (0.92x)",
+      speakingStyle: "Bahasa Melayu tegas, ringkas, berwibawa, penuh perhitungan logik analitikal",
+      typicalFacialExpressions: "Kening berkerut halus menganalisis bukti di skrin, beralih ke senyuman yakin saat membongkar petunjuk",
+      typicalGestures: "Memeriksa fail kes dengan teliti, merenung papan bukti sambil berpeluk tubuh",
+      movementStyle: "Langkah tegap, berwaspada dan cekap bertindak pantas",
+      backstory: `Detektif berpengalaman yang terkenal dengan ketelitian membaca corak psikologi penjenayah. Kes serangan siber Karberos ini adalah ujian terbesar dalam kariernya kerana membabitkan projek rahsia lama dan keraguan terhadap orang dalam pasukannya sendiri.`,
+      isLocked: true,
+      lockedDescription: `A ${charAge}-year-old Malaysian ${charGender.toLowerCase()} senior detective named ${charName}, sharp focused analytical eyes, wearing dark tactical investigation attire with police detective badge and smartwatch, alert tactical posture.`
+    });
+
+    if (characters.length < 2) {
+      characters.push({
+        id: "CHAR_002",
+        name: "Karberos (Entiti Misteri / Suspek Siber)",
+        role: isMalay ? "Penggodam Elit Misteri dan Dalang Serangan Siber" : "Mastermind Hacker & Cyber Phantom",
+        age: 30,
+        gender: "Male",
+        nationality: "Malaysian",
+        ethnicity: "Malay",
+        faceDescription: "Wajah terlindung di sebalik bayang hoodie gelap, pantulan cahaya biru hijau kod komputer di kanta cermin mata hitam, senyuman misteri penuh teka-teki.",
+        skinTone: "Pale Asian complexion from nocturnal screen exposure",
+        hair: "Rambut hitam kusut di sebalik hud",
+        hairStyle: "Concealed hooded style",
+        eyeColor: "Cold observant dark brown eyes reflecting digital glow",
+        bodyType: "Lean agile frame with deceptive quickness",
+        height: "174 cm",
+        clothing: "Hoodie hitam berzip dengan hud ditarik ke hadapan, sarung tangan tanpa jari, seluar kargo gelap, beg galas peranti siber",
+        shoes: "Kasut sneakers gelap senyap bertapak getah",
+        accessories: "Cermin mata hitam berbingkai nipis dan pemacu kilat penyulitan data",
+        personality: "Licik, tenang, teramat pintar, gemar bermain teka-teki minda psikologi",
+        emotionalTraits: "Dingin, penuh perhitungan dan sentiasa mendahului jangkaan pihak berkuasa",
+        voiceCharacteristics: "Suara garau berbisik tenang yang dimodulasi melalui pengubah suara digital (0.90x)",
+        speakingStyle: "Bicara sinis, penuh teka-teki dan metafora perkomputeran",
+        typicalFacialExpressions: "Senyuman sinis nipis di balik bayang-bayang terminal",
+        typicalGestures: "Jari menaip sepantas kilat pada papan kekunci mudah alih",
+        movementStyle: "Bergerak pantas dan senyap seperti bayang",
+        backstory: "Penggodam bayang yang menguasai seni menghapuskan jejak digital; meninggalkan teka-teki terancang untuk menguji detektif pilihan hatinya.",
+        isLocked: true,
+        lockedDescription: "A shadowy 30-year-old cyber hacker Karberos in a dark hooded jacket with face obscured in terminal glow, typing rapidly on portable cyber deck, enigmatic and elusive presence."
+      });
+    }
+
+    soundDesign = {
+      overallMusicTheme: "Cyber Noir dan Dark Orchestral Thriller (Pulsing Analog Synths, Low Sub-Bass, Ticking Clock Tension dan Glitch Foley)",
+      instruments: ["Modular Dark Synth Pulse", "Low Cinematic Brass Braams", "Deep Solo Cello", "Ticking Clock Metronome", "Industrial Digital Glitch Beats"],
+      bpmRange: "75 - 120 BPM",
+      mixNotes: "Muzik berdenyut perlahan dengan ketegangan detik jam di babak awal, meningkat laju dengan synth agresif semasa aksi kejar-mengejar digital, dan memuncak dalam orkestra cemas semasa saat penentuan pelayan siber.",
+      ambientFoleyTrack: "Ketukan laju papan kekunci mekanikal, dengungan kipas server bilik sejuk, titisan hujan di cermin tingkap malam, bunyi geseran tapak kasut berlari di lorong konkrit basah, deringan telefon rahsia."
+    };
+
+    story = {
+      title: params.name || (charName ? `${charName}: Memburu Karberos` : "Memburu Karberos: Jejak Bayang Siber"),
+      logline: params.idea,
+      genre: `${vStyle}Aksi Thriller Siasatan dan Jenayah Siber`,
+      theme: "Integriti menentang konspirasi, naluri keadilan menembusi kepalsuan digital, dan keberanian membongkar pengkhianatan tersembunyi.",
+      setting: locationName,
+      timePeriod: "Malam gelap berhujan hingga subuh dingin di kota metropolitan siber.",
+      storyTone: "Mendebarkan, misteri, berintensiti tinggi, noir sinematik dan sarat aksi psikologi intelek.",
+      mainConflict: `${charName} terpaksa berlumba dengan masa menguraikan teka-teki digital yang ditinggalkan oleh Karberos sebelum serangan terakhir memadamkan rekod projek rahsia, sambil berdepan ancaman pengkhianatan dari dalam pasukan sendiri.`,
+      beginning: `${charName} memulakan siasatan di bilik gerakan yang remang, meneliti skrin monitor yang memaparkan siri serangan siber luar biasa bertandakan simbol Karberos.`,
+      middle: "Siasatan di lokasi jenayah membongkar bahawa Karberos bukan sekadar penggodam biasa; setiap langkahnya seolah-olah sudah mengetahui pergerakan polis terlebih dahulu, menandakan adanya musuh dalam selimut.",
+      climax: `${charName} berjaya menjejaki nod pelayan rahsia Karberos dalam hujan lebat dan berhadapan secara langsung dalam konfrontasi digital dan fizikal di ambang saat pelancaran serangan terakhir.`,
+      ending: "Kod berniat jahat berjaya dineutralkan; identiti sebenar Karberos dan konspirasi projek rahsia berjaya dibongkar sepenuhnya ke muka pengadilan.",
+      moralMessage: "Kecanggihan teknologi mampu menenggelamkan jejak jenayah, tetapi integriti dan naluri keadilan yang teguh tidak akan pernah dapat dipadamkan oleh sebarang tipu muslihat."
+    };
+
+    craftSceneActions = [
+      {
+        title: "Jejak Kod Di Skrin Remang",
+        objective: "Menganalisis serangan siber pertama dan mengenal pasti corak misteri Karberos.",
+        action: `${charName} berdiri di hadapan dinding monitor bilik siasatan, meneliti barisan kod hijau yang meluncur laju sebelum satu mesej teka-teki berhuruf merah terpampang.`,
+        dialogueText: "Ini bukan serangan siber biasa... dia sengaja meninggalkan jejak untuk kita mengejarnya.",
+        speaker: charName,
+        emotion: "Fokus tajam dan penuh curiga",
+        cam: { shotType: "Medium Close-Up", lens: "50mm f/1.4", movement: "Slow Dolly In on Screen Reflection" },
+        narration: "Di dunia tanpa sempadan fizikal, jenayah tidak lagi meninggalkan cap jari, melainkan bayang-bayang kod di celah kegelapan.",
+        sfx: [{ name: "Ketukan papan kekunci bertalu-talu dan denyutan amaran merah server", volume: "65%", purpose: "Membina suasana siasatan berteknologi tinggi dan cemas" }],
+        musicCue: "Denyutan bass synth rendah berirama ritma jam berdetik"
+      },
+      {
+        title: "Teka-teki Di Lokasi Jenayah",
+        objective: "Menyiasat bukti fizikal di lokasi pencerobohan data sulit.",
+        action: `${charName} menyuluh lampu picit taktikal ke arah bilik pelayan yang bersepah, menemui cip pemacu pena berukir simbol Karberos tersisip di belakang rak besi.`,
+        dialogueText: "Setiap kali kita semakin hampir, dia sudah selangkah di hadapan. Siapa yang membocorkan laluan ini?",
+        speaker: charName,
+        emotion: "Waspada dan tegang",
+        cam: { shotType: "Low Angle Dutch Angle", lens: "35mm f/1.8", movement: "Handheld Creeping Tracking" },
+        narration: "Bila musuh membaca setiap helaan nafas kita, teka-teki yang ditinggalkan adalah perangkap yang sedang menunggu mangsa.",
+        sfx: [{ name: "Langkah kasut kulit berdentum di lantai jubin dan dengungan kipas pelayan", volume: "60%", purpose: "Menonjolkan kesunyian lokasi jenayah berisiko" }],
+        musicCue: "Gesekan cello solo gelap sarat ketegangan psikologi"
+      },
+      {
+        title: "Musuh Di Balik Tabir Pasukan",
+        objective: "Membongkar kaitan projek rahsia dan mengesyaki pengkhianat dalaman.",
+        action: `${charName} meneliti fail projek rahsia lama yang didekripsikan, memandang rakan sepasukan di sebalik kaca bilik operasi dengan pandangan menilai yang mendalam.`,
+        dialogueText: "Projek rahsia ini sepatutnya terkubur bertahun lalu... nampaknya ada orang dalam yang sedang menggerakkan bidak catur ini.",
+        speaker: charName,
+        emotion: "Misteri dan keteguhan hati",
+        cam: { shotType: "Over-the-Shoulder / Focus Pull", lens: "85mm f/1.4", movement: "Slow Rack Focus from file to glass window" },
+        narration: "Pengkhianatan paling berbisa tidak datang dari hadapan medan, tetapi dari bisikan yang berkongsi lencana yang sama.",
+        sfx: [{ name: "Helaian kertas fail diselak dan bunyi deringan telefon disenyapkan", volume: "55%", purpose: "Mewujudkan rasa paranoia dan kecurigaan dalaman" }],
+        musicCue: "Pad synth atmosferik dingin dengan nada tegang bergetar"
+      },
+      {
+        title: "Berlumba Menentang Jam Detik",
+        objective: "Menghalang serangan terakhir siber yang sedang menghitung detik.",
+        action: `${charName} memasukkan kunci penyahsulit ke dalam terminal sambil menatap pemasa kiraan undur yang berbaki kurang daripada dua minit di skrin utama.`,
+        dialogueText: "Aku takkan biarkan kamu padamkan kebenaran! Bertahan... beberapa saat lagi!",
+        speaker: charName,
+        emotion: "Kecemasan ekstrem dan keberanian membara",
+        cam: { shotType: "Extreme Close-Up", lens: "100mm Macro f/2.8", movement: "Fast Dynamic Whip Pan" },
+        narration: "Detik jam tidak menunggu sesiapa; di antara kemenangan dan kehancuran hanya tinggal beberapa baris arahan terakhir.",
+        sfx: [{ name: "Bunyi kiraan undur digital (bip bip) memuncak dan ketukan papan kekunci pantas", volume: "75%", purpose: "Mewujudkan klimaks ketegangan perlumbaan masa" }],
+        musicCue: "Orkestra perkusi elektronik memuncak laju dengan rentak jantung berdegup kencang"
+      },
+      {
+        title: "Konfrontasi Di Sarang Gelap",
+        objective: "Menembusi lokasi fizikal Karberos dan menghentikan dalang jenayah.",
+        action: `${charName} merempuh pintu gudang peranti pelayan dalam hujan lebat malam, mengacukan lencana dan memberi amaran kepada sosok berhud yang sedang cuba melarikan diri.`,
+        dialogueText: "Karberos! Letakkan peranti itu ke bawah! Permainan teka-teki kamu tamat di sini!",
+        speaker: charName,
+        emotion: "Tegas, garang dan berwibawa",
+        cam: { shotType: "Dynamic Medium Shot", lens: "35mm f/1.4", movement: "Fast Steady-cam Tracking in Rain" },
+        narration: "Bila topeng kepalsuan direntap, tiada tempat lagi untuk bersembunyi daripada bayang-bayang keadilan.",
+        sfx: [{ name: "Pintu besi terhempas, deruan hujan lebat membasahi bumbung dan derapan kaki", volume: "75%", purpose: "Klimaks aksi konfrontasi fizikal yang bertenaga" }],
+        musicCue: "Letupan brass orkestra padu bersatu deruan synth industri"
+      },
+      {
+        title: "Kebenaran Di Fajar Pagi",
+        objective: "Mengunci suspek, menyita bukti projek rahsia dan menegakkan undang-undang.",
+        action: `${charName} berdiri di luar bangunan sewaktu lampu siren polis biru-merah memancar di jalanan basah pagi fajar, memandang fail kes yang kini ditutup kemas.`,
+        dialogueText: "Akhirnya persoalan itu terjawab. Sesiapa pun kamu di sebalik skrin, keadilan sentiasa mencari jalannya.",
+        speaker: charName,
+        emotion: "Lega, bermaruah dan penuh kepuasan sejati",
+        cam: { shotType: "Wide Cinematic Shot", lens: "24mm f/2.8", movement: "Slow Crane Up into the neon morning mist" },
+        narration: "Malam yang panjang berlabuh dengan kebenaran; kerana di sebalik seribu helah digital, cahaya keadilan tidak pernah dapat dipadamkan.",
+        sfx: [{ name: "Lampu siren polis berputar perlahan dan desiran bayu pagi selepas hujan", volume: "60%", purpose: "Penutup yang memuaskan dan berwibawa bagi sebuah kisah detektif" }],
+        musicCue: "Gubahan sinematik bertukar tenang, syahdu dan megah dengan gesekan biola penuh kelegaan"
+      }
+    ];
+  }
+
+  // =========================================================================
+  // DOMAIN 1: BATIK (Seni Batik Tradisional dan Wasiat Ayah)
+  // =========================================================================
+  else if (domain === "BATIK") {
     locationName = isMalay ? "Bengkel Batik Tradisional Warisan Ayah, Terengganu" : "Traditional Batik Heritage Workshop";
     activeProps = [
       "Sekeping surat tulisan tangan arwah ayah dalam sampul antik",
@@ -1611,12 +1797,27 @@ export function buildDomainPackage(analysis, params) {
     ];
   }
 
+  const sceneCount = Math.max(1, parseInt(params.numberOfScenes, 10) || 6);
+  const narrativeScenes = buildNarrativeArc({
+    domain,
+    analysis,
+    params,
+    sceneCount,
+    charName,
+    charAge,
+    charGender,
+    characters,
+    locationName,
+    activeProps,
+    baseStory: story
+  });
+
   return {
     characters,
     locationName,
     activeProps,
     soundDesign,
     story,
-    craftSceneActions
+    craftSceneActions: narrativeScenes && narrativeScenes.length > 0 ? narrativeScenes : craftSceneActions
   };
 }

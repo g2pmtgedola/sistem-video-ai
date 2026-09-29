@@ -108,21 +108,30 @@ export const aiService = {
     const text = (ideaText || "").toLowerCase();
     const isMalay = (params.language || "Bahasa Melayu").toLowerCase().includes("melayu") || (params.language || "").toLowerCase().includes("malay");
 
-    // 1. Gender Detection
-    const femaleKeywords = /(gadis|gadia|wanita|perempuan|ibu|emak|mak|nenek|kakak|anak perempuan|puteri|puan|cik|ustazah|suraya|siti|aisyah|nurul|fatimah|zaleha|nadia|farah|amira|atiqah|hawa|pelajar perempuan|murid perempuan|girl|woman|female|daughter|mother|sister|her|she)/i;
+    // 1. Gender Detection with strict word boundaries
+    const femaleKeywords = /\b(gadis|wanita|perempuan|ibu|emak|mak|nenek|kakak|anak perempuan|puteri|puan|cik|ustazah|suraya|siti|aisyah|nurul|fatimah|zaleha|nadia|farah|amira|atiqah|hawa|pelajar perempuan|murid perempuan|girl|woman|female|daughter|mother|sister|her|she)\b/i;
+    const maleKeywords = /\b(kamal|amir|azman|farid|danial|haikal|azlan|hakim|faizal|khairul|razak|hassan|osman|ali|abu|lelaki|pemuda|bapa|ayah|abah|abang|atuk|datuk|anak lelaki|boy|man|male|son|father|brother|his|he|him)\b/i;
+
     let isFemale = false;
     if (params.leadGender === "Female") {
       isFemale = true;
     } else if (params.leadGender === "Male") {
       isFemale = false;
-    } else {
-      isFemale = femaleKeywords.test(ideaText) || (params.voiceStyle && params.voiceStyle.toLowerCase() === "female");
+    } else if (params.voiceStyle && params.voiceStyle.toLowerCase() === "female") {
+      isFemale = true;
+    } else if (femaleKeywords.test(ideaText) && !maleKeywords.test(ideaText)) {
+      isFemale = true;
+    } else if (maleKeywords.test(ideaText) && !femaleKeywords.test(ideaText)) {
+      isFemale = false;
+    } else if (femaleKeywords.test(ideaText)) {
+      isFemale = true;
     }
-    const isElderly = /(tua|warga emas|pak|tok|atuk|datuk|mahaguru|old man|elderly|veteran)/i.test(ideaText);
-    const hasFatherMention = /(arwah ayah|ayah|bapa|abah|father|dad)/i.test(ideaText);
+
+    const isElderly = /\b(tua|warga emas|pak|tok|atuk|datuk|mahaguru|old man|elderly|veteran)\b/i.test(ideaText);
+    const hasFatherMention = /\b(arwah ayah|ayah|bapa|abah|father|dad)\b/i.test(ideaText);
 
     // 2. Student / Age / Demographic Extraction
-    const isStudent = /(pelajar|murid|sekolah|tingkatan|darjah|spm|pt3|student|school|high school)/i.test(ideaText);
+    const isStudent = /\b(pelajar|murid|sekolah|tingkatan|darjah|spm|pt3|stpm|peperiksaan|bilik darjah|tuisyen|student|school|high school)\b/i.test(ideaText);
     let extractedAge = null;
     let studentGrade = "";
 
@@ -147,13 +156,13 @@ export const aiService = {
       const dVal = parseInt(dMatch[1], 10);
       extractedAge = 6 + dVal; // Darjah 1 = 7, Darjah 6 = 12
       studentGrade = `Murid Sekolah Rendah Darjah ${dVal}`;
-    } else if (/kanak-kanak|budak kecil|child|kid/i.test(ideaText)) {
+    } else if (/\b(kanak-kanak|budak kecil|child|kid)\b/i.test(ideaText)) {
       extractedAge = 10;
       studentGrade = "Kanak-kanak";
-    } else if (/remaja|teenager|teen/i.test(ideaText)) {
+    } else if (/\b(remaja|teenager|teen)\b/i.test(ideaText)) {
       extractedAge = 16;
       studentGrade = "Remaja";
-    } else if (/universiti|kolej|mahasiswa|mahasiswi|undergraduate/i.test(ideaText)) {
+    } else if (/\b(universiti|kolej|mahasiswa|mahasiswi|undergraduate)\b/i.test(ideaText)) {
       extractedAge = 21;
       studentGrade = "Mahasiswa Universiti";
     } else {
@@ -171,42 +180,67 @@ export const aiService = {
       "wanita", "lelaki", "pelajar", "doktor", "dr", "polis", "bomba", "guru",
       "atlet", "peniaga", "murid", "orang", "tentera", "tukang", "pekerja",
       "nelayan", "pendekar", "pesilat", "petani", "penoreh", "warga", "emas",
-      "makcik", "pakcik", "atuk", "datuk", "nenek", "abang", "kakak", "adik"
+      "makcik", "pakcik", "atuk", "datuk", "nenek", "abang", "kakak", "adik",
+      "detektif", "penyiasat", "hacker", "penggodam"
     ];
 
-    // Check for Title/Honorific + Name (e.g., Dr Nadia, Dr. Aisyah, Cikgu Azlan, Ustaz Syakir, Pegawai Farid)
-    const titleNameMatch = ideaText.match(/(?:kisah\s+)?(Dr\.?|Doktor|Cikgu|Ustaz|Ustazah|Kapten|Inspektor|Sarjan|Mejar|Pegawai)\s+([A-Za-z]+)/i);
-    if (titleNameMatch && !skipWords.includes(titleNameMatch[2].toLowerCase())) {
-      const titlePrefix = titleNameMatch[1].replace(/\.$/, "");
-      const personName = titleNameMatch[2].charAt(0).toUpperCase() + titleNameMatch[2].slice(1).toLowerCase();
-      extractedName = `${titlePrefix} ${personName}`;
-    } else {
-      const directNameMatch = ideaText.match(/(?:bernama|nama(?:nya)?)\s+([A-Za-z]+)/i);
-      if (directNameMatch && !skipWords.includes(directNameMatch[1].toLowerCase())) {
-        extractedName = directNameMatch[1].charAt(0).toUpperCase() + directNameMatch[1].slice(1).toLowerCase();
-      } else {
-        const generalNameMatch = ideaText.match(/kisah\s+([A-Za-z]+)\b/i);
-        if (generalNameMatch && !skipWords.includes(generalNameMatch[1].toLowerCase())) {
-          extractedName = generalNameMatch[1].charAt(0).toUpperCase() + generalNameMatch[1].slice(1).toLowerCase();
-        }
+    // Priority 1: Header / Title Colon format, e.g. "**KAMAL: MEMBURU KARBEROS**" or "KAMAL: ..."
+    const titleColonMatch = ideaText.match(/(?:^\s*|\n)\s*(?:\*\*)?([A-Za-z]+)\s*:\s*[^\n]+/i);
+    if (titleColonMatch && !skipWords.includes(titleColonMatch[1].toLowerCase())) {
+      extractedName = titleColonMatch[1].charAt(0).toUpperCase() + titleColonMatch[1].slice(1).toLowerCase();
+    }
+
+    // Priority 2: "Name, seorang detektif / guru / pemuda..."
+    if (!extractedName) {
+      const commaSeorangMatch = ideaText.match(/\b([A-Z][a-z]+),\s+seorang\b/);
+      if (commaSeorangMatch && !skipWords.includes(commaSeorangMatch[1].toLowerCase())) {
+        extractedName = commaSeorangMatch[1].charAt(0).toUpperCase() + commaSeorangMatch[1].slice(1).toLowerCase();
       }
     }
 
-    // 4. Domain Detection
-    const isBatik = /(batik|canting|mencanting|kain batik|lilin batik|pewarna batik)/i.test(ideaText);
-    const isWoodcarving = /(ukir|ukiran|kayu|pahat|cengal|woodcarver|woodcarving|craftsman)/i.test(ideaText);
-    const isSilat = /(silat|pendekar|pesilat|guru silat|keris|jurus|seni silat|gelanggang silat|martial arts)/i.test(ideaText);
-    const isWeaving = /(tenun|songket|kik|benang emas|loom|weaver)/i.test(ideaText);
-    const isFisherman = /(nelayan|pukat|kelong|perahu nelayan|bot nelayan|menangkap ikan|lautan|meredah ombak)/i.test(ideaText);
-    const isHealthcare = /(doktor|jururawat|hospital|klinik|pesakit|pembedahan|wad kecemasan|ambulans|stetoskop)/i.test(ideaText);
-    const isRescue = /(bomba|penyelamat|padam api|kebakaran|mangsa banjir|arus banjir|misi menyelamat)/i.test(ideaText);
-    const isCulinary = /(masak|kuih|dapur|rendang|resepi|makanan|chef|cooking|kuih tradisional|lauk|hidangan|masakan)/i.test(ideaText);
-    const isSports = /(sukan|bola sepak|futsal|badminton|lari pecut|pelari|atlet|kejohanan sukan|stadium|trek larian)/i.test(ideaText);
-    const isBusiness = /(bisnes|perniagaan|peniaga|berniaga|gerai|kedai|jual|jualan|modal|usahawan|kopi|burger|rider|trak makanan|restoran|kedai makan)/i.test(ideaText);
-    const isFamily = /(keluarga|ibu|emak|ayah|bapa|anak|rumah pusaka|arwah|kasih sayang|pengorbanan keluarga)/i.test(ideaText);
+    // Priority 3: Check for Title/Honorific + Name (e.g., Detektif Kamal, Dr Nadia, Cikgu Azlan, Ustaz Syakir, Pegawai Farid)
+    if (!extractedName) {
+      const titleNameMatch = ideaText.match(/(?:kisah\s+)?(Detektif|Inspektor|Dr\.?|Doktor|Cikgu|Ustaz|Ustazah|Kapten|Sarjan|Mejar|Pegawai)\s+([A-Za-z]+)/i);
+      if (titleNameMatch && !skipWords.includes(titleNameMatch[2].toLowerCase())) {
+        const titlePrefix = titleNameMatch[1].replace(/\.$/, "");
+        const personName = titleNameMatch[2].charAt(0).toUpperCase() + titleNameMatch[2].slice(1).toLowerCase();
+        extractedName = `${titlePrefix} ${personName}`;
+      }
+    }
+
+    // Priority 4: "bernama Name" or "namanya Name"
+    if (!extractedName) {
+      const directNameMatch = ideaText.match(/(?:bernama|nama(?:nya)?)\s+([A-Za-z]+)/i);
+      if (directNameMatch && !skipWords.includes(directNameMatch[1].toLowerCase())) {
+        extractedName = directNameMatch[1].charAt(0).toUpperCase() + directNameMatch[1].slice(1).toLowerCase();
+      }
+    }
+
+    // Priority 5: "kisah Name"
+    if (!extractedName) {
+      const generalNameMatch = ideaText.match(/kisah\s+([A-Za-z]+)\b/i);
+      if (generalNameMatch && !skipWords.includes(generalNameMatch[1].toLowerCase())) {
+        extractedName = generalNameMatch[1].charAt(0).toUpperCase() + generalNameMatch[1].slice(1).toLowerCase();
+      }
+    }
+
+    // 4. Domain Detection with strict word boundaries
+    const isInvestigation = /\b(detektif|penyiasat|penyiasatan|siasatan|hacker|penggodam|serangan siber|jenayah|kes jenayah|forensik|inteligen|perisik|spy|detective|investigation|cyber|cybercrime)\b/i.test(ideaText);
+    const isBatik = /\b(batik|canting|mencanting|kain batik|lilin batik|pewarna batik)\b/i.test(ideaText);
+    const isWoodcarving = /\b(ukir|ukiran|kayu|pahat|cengal|woodcarver|woodcarving|craftsman)\b/i.test(ideaText);
+    const isSilat = /\b(silat|pendekar|pesilat|guru silat|keris|jurus|seni silat|gelanggang silat|martial arts)\b/i.test(ideaText);
+    const isWeaving = /\b(tenun|songket|kik|benang emas|loom|weaver)\b/i.test(ideaText);
+    const isFisherman = /\b(nelayan|pukat|kelong|perahu nelayan|bot nelayan|menangkap ikan|lautan|meredah ombak)\b/i.test(ideaText);
+    const isHealthcare = /\b(doktor|jururawat|hospital|klinik|pesakit|pembedahan|wad kecemasan|ambulans|stetoskop)\b/i.test(ideaText);
+    const isRescue = /\b(bomba|penyelamat|padam api|kebakaran|mangsa banjir|arus banjir|misi menyelamat)\b/i.test(ideaText);
+    const isCulinary = /\b(masak|kuih|dapur|rendang|resepi|makanan|chef|cooking|kuih tradisional|lauk|hidangan|masakan)\b/i.test(ideaText);
+    const isSports = /\b(sukan|bola sepak|futsal|badminton|lari pecut|pelari|atlet|kejohanan sukan|stadium|trek larian)\b/i.test(ideaText);
+    const isBusiness = /\b(bisnes|perniagaan|peniaga|berniaga|gerai|kedai|jual|jualan|modal|usahawan|kopi|burger|rider|trak makanan|restoran|kedai makan)\b/i.test(ideaText);
+    const isFamily = /\b(keluarga|ibu|emak|ayah|bapa|anak|rumah pusaka|arwah|kasih sayang|pengorbanan keluarga)\b/i.test(ideaText);
 
     let domain = "GENERAL";
-    if (isBatik) domain = "BATIK";
+    if (isInvestigation) domain = "INVESTIGATION";
+    else if (isBatik) domain = "BATIK";
     else if (isWoodcarving) domain = "UKIRAN";
     else if (isSilat) domain = "SILAT";
     else if (isFisherman) domain = "FISHERMAN";
@@ -290,7 +324,7 @@ export const aiService = {
     };
 
     for (let i = 1; i <= sceneCount; i++) {
-      const sceneActionData = craftSceneActions[(i - 1) % craftSceneActions.length];
+      const sceneActionData = craftSceneActions[i - 1] || craftSceneActions[(i - 1) % craftSceneActions.length];
       const sceneId = `SCENE_${String(i).padStart(3, "0")}`;
       const currentSceneDur = sceneDurations[i - 1];
       const sceneStartTime = cumulativeSeconds;
@@ -310,7 +344,7 @@ export const aiService = {
         }
       }
 
-      const presentIds = characters.length > 1 && (i === 1 || i === 2 || i === sceneCount)
+      const presentIds = characters.length > 1 && (i === 1 || i === Math.ceil(sceneCount / 2) || i === sceneCount)
         ? characters.map(c => c.id)
         : [leadChar.id];
 
@@ -318,15 +352,65 @@ export const aiService = {
         .filter((c) => presentIds.includes(c.id))
         .map((c) => `[${c.id}: ${c.name}, ${c.lockedDescription}]`);
 
+      // Calculate narrative time progression and lighting across sceneCount
+      const progressRatio = sceneCount > 1 ? (i - 1) / (sceneCount - 1) : 0;
+      let timeOfDay = "Awal pagi hening";
+      let dynamicLighting = "Soft cool morning ambient light with gentle directional sunbeams";
+
+      if (analysis.domain === "INVESTIGATION") {
+        if (progressRatio < 0.2) {
+          timeOfDay = "Larut malam remang (11:30 PM)";
+          dynamicLighting = "Moody low-key terminal glow with stark blue neon shadows and screen reflections";
+        } else if (progressRatio < 0.45) {
+          timeOfDay = "Tengah malam berhujan lebat (1:15 AM)";
+          dynamicLighting = "Rain-slicked neon street reflections with harsh directional headlights and deep shadows";
+        } else if (progressRatio < 0.7) {
+          timeOfDay = "Waktu krisis genting (3:30 AM)";
+          dynamicLighting = "Emergency red strobe warning pulses and harsh high-contrast server rack LEDs";
+        } else if (progressRatio < 0.9) {
+          timeOfDay = "Ambang fajar subuh sejuk (5:15 AM)";
+          dynamicLighting = "Dramatic silhouette backlight against rain-washed industrial darkness";
+        } else {
+          timeOfDay = "Fajar pagi keemasan (7:00 AM)";
+          dynamicLighting = "Glorious golden dawn light piercing through morning mist, triumphant atmospheric clarity";
+        }
+      } else {
+        if (progressRatio < 0.2) {
+          timeOfDay = "Awal pagi hening berkabus (7:00 AM)";
+          dynamicLighting = "Soft diffuse morning light with low ambient shadows and gentle sunbeams";
+        } else if (progressRatio < 0.45) {
+          timeOfDay = "Tengah hari cerah bertenaga (11:30 AM)";
+          dynamicLighting = "Crisp bright natural daylight with sharp focused dimensional contrast";
+        } else if (progressRatio < 0.7) {
+          timeOfDay = "Petang mendung mencabar (3:45 PM)";
+          dynamicLighting = "Moody overcast drama with warm directional tungsten practical lamps";
+        } else if (progressRatio < 0.9) {
+          timeOfDay = "Senja merah kemuncak (6:30 PM)";
+          dynamicLighting = "Intense golden hour rim light and long cinematic dramatic shadows";
+        } else {
+          timeOfDay = "Pagi keemasan gemilang (8:00 AM)";
+          dynamicLighting = "Warm triumphant volumetric golden rays illuminating the scene";
+        }
+      }
+
+      // Scene-specific location and props
+      const sceneLocation = sceneActionData.environment || locationName;
+      const sceneLocationEn = sceneActionData.environmentEn || sceneLocation;
+      const sceneProps = sceneActionData.props || activeProps.join(", ");
+      const scenePropsEn = sceneActionData.propsEn || sceneProps;
+      const sceneActionEn = sceneActionData.visualActionEn || sceneActionData.action;
+      const sceneExpressionEn = sceneActionData.expressionEn || sceneActionData.emotion;
+      const sceneBodyLanguageEn = sceneActionData.bodyLanguageEn || "Natural, alert posture adhering strictly to the scene action with authentic emotional depth";
+
       const imgPrompt = promptBuilder.buildImagePrompt({
         characterLockedDescriptions: activeCharsLocked,
-        action: sceneActionData.action,
-        expression: sceneActionData.emotion,
-        bodyLanguage: "Natural, authentic posture with rich emotional depth",
-        environment: locationName,
-        props: activeProps.join(", "),
-        timeOfDay: i === sceneCount ? "Golden morning sunlight" : "Warm afternoon window glow",
-        lighting: "Warm cinematic volumetric sunlight, dramatic soft contrast",
+        action: sceneActionEn,
+        expression: sceneExpressionEn,
+        bodyLanguage: sceneBodyLanguageEn,
+        environment: sceneLocationEn,
+        props: scenePropsEn,
+        timeOfDay: timeOfDay,
+        lighting: dynamicLighting,
         cameraAngle: sceneActionData.cam.shotType,
         lens: sceneActionData.cam.lens,
         composition: "Cinematic rule of thirds with organic depth of field",
@@ -346,19 +430,20 @@ export const aiService = {
         FAMILY: "Soft golden dust motes floating gently in sunlit room",
         SILAT: "Subtle dust swirling from grounded footwork, gentle leaves rustling",
         FISHERMAN: "Fine ocean mist floating in warm sunlight, gentle boat sway",
+        INVESTIGATION: "Blinking cyber server LED rack lights, subtle rain streaks on window, moody atmospheric noir haze",
         GENERAL: "Atmospheric natural dust motes floating gently in volumetric sunlight"
       };
       const envMovement = domainEnvMovements[analysis.domain] || domainEnvMovements.GENERAL;
 
       const vidPrompt = promptBuilder.buildVideoPrompt({
         characterLockedDescriptions: activeCharsLocked,
-        action: sceneActionData.action,
+        action: sceneActionEn,
         movement: `Fluid natural movement at 24fps. ${sceneActionData.cam.movement}`,
-        expression: sceneActionData.emotion,
+        expression: sceneExpressionEn,
         environmentMovement: envMovement,
         cameraMovement: sceneActionData.cam.movement,
         cameraAngle: sceneActionData.cam.shotType,
-        lighting: "Warm golden atmospheric illumination",
+        lighting: dynamicLighting,
         cinematicStyle: `${params.visualStyle} 4k masterwork`
       });
 
@@ -378,13 +463,19 @@ export const aiService = {
         duration: currentSceneDur || 8,
         title: sceneActionData.title,
         objective: sceneActionData.objective || `Menggerakkan perkembangan fasa ${i} berfokuskan usaha ${leadChar.name}.`,
-        location: locationName,
-        time: i === sceneCount ? "8:00 AM (Pagi)" : "3:30 PM (Petang)",
-        environment: locationName,
+        location: sceneLocation,
+        time: timeOfDay,
+        environment: sceneLocation,
+        environmentEn: sceneLocationEn,
+        props: sceneProps,
+        propsEn: scenePropsEn,
         charactersPresent: presentIds,
         characterPositions: presentIds.length > 1 ? `${leadChar.name} di bahagian tengah, ${characters[1].name} di latar sisi.` : `${leadChar.name} berada di tengah bingkai.`,
         action: sceneActionData.action,
+        visualActionEn: sceneActionEn,
         emotion: sceneActionData.emotion,
+        expressionEn: sceneExpressionEn,
+        bodyLanguageEn: sceneBodyLanguageEn,
         narration: sceneActionData.narration || (isMalay ? `Setiap detik perjuangan ${leadChar.name} membuktikan ketabahan hati menyongsong impian.` : `Every step forward tests the resolve within.`),
         dialogue: {
           characterId: speakerChar.id,
@@ -402,7 +493,7 @@ export const aiService = {
           lens: sceneActionData.cam.lens,
           angle: "Eye Level"
         },
-        lighting: "Warm volumetric shafts of natural sunlight.",
+        lighting: dynamicLighting,
         sfx: (sceneActionData.sfx && sceneActionData.sfx.length > 0)
           ? sceneActionData.sfx.map(item => ({
               name: item.name,
@@ -444,6 +535,7 @@ export const aiService = {
       FAMILY: "Cozy warm living room ambient glow with soft evening window light",
       SILAT: "Dramatic twilight backlight filtering through tropical rainforest trees onto the gelanggang",
       FISHERMAN: "Epic golden sunrise reflecting off calm coastal ocean water and mist",
+      INVESTIGATION: "Moody low-key noir lighting with high-contrast shadows and glowing cyber terminals",
       GENERAL: "Cinematic natural ambient lighting with directional key light"
     };
 
@@ -459,6 +551,7 @@ export const aiService = {
       FAMILY: "Petang pertemuan keluarga hingga malam keakraban",
       SILAT: "Subuh latihan asas hingga senja ujian persilatan",
       FISHERMAN: "Pagi buta bertolak ke laut hingga petang bot pulang membawa hasil",
+      INVESTIGATION: "Malam siasatan bilik operasi hingga konfrontasi fajar",
       GENERAL: "Permulaan cabaran hingga fajar kejayaan"
     };
 
@@ -509,13 +602,19 @@ export const aiService = {
     const lockedStrs = activeChars.map((c) => `[${c.id}: ${c.name}, ${c.lockedDescription}]`);
 
     const refreshed = { ...scene };
+    const sceneActionEn = refreshed.visualActionEn || refreshed.action;
+    const sceneExpressionEn = refreshed.expressionEn || refreshed.emotion || "Calm and concentrated";
+    const sceneBodyLanguageEn = refreshed.bodyLanguageEn || "Natural, alert posture adhering strictly to the scene action with authentic emotional depth";
+    const sceneEnvironmentEn = refreshed.environmentEn || refreshed.environment || refreshed.location || "Cinematic setting";
+    const scenePropsEn = refreshed.propsEn || refreshed.props || "Essential scene equipment";
+
     refreshed.imagePrompt = promptBuilder.buildImagePrompt({
       characterLockedDescriptions: lockedStrs,
-      action: refreshed.action,
-      expression: refreshed.emotion || "Calm and concentrated",
-      bodyLanguage: "Grounded artisan composure",
-      environment: refreshed.environment,
-      props: "Essential craft tools",
+      action: sceneActionEn,
+      expression: sceneExpressionEn,
+      bodyLanguage: sceneBodyLanguageEn,
+      environment: sceneEnvironmentEn,
+      props: scenePropsEn,
       timeOfDay: refreshed.time,
       lighting: refreshed.lighting || "Warm cinematic lighting",
       cameraAngle: refreshed.camera?.shotType || "Medium Shot",
@@ -526,10 +625,10 @@ export const aiService = {
 
     refreshed.videoPrompt = promptBuilder.buildVideoPrompt({
       characterLockedDescriptions: lockedStrs,
-      action: refreshed.action,
+      action: sceneActionEn,
       movement: refreshed.camera?.movement || "Slow cinematic dolly in",
-      expression: refreshed.emotion || "Poised and thoughtful",
-      environmentMovement: "Atmospheric dust motes floating in sunlight",
+      expression: sceneExpressionEn,
+      environmentMovement: "Atmospheric natural dust motes floating in volumetric light",
       cameraMovement: refreshed.camera?.movement || "Smooth dolly motion",
       cameraAngle: refreshed.camera?.shotType || "Medium Shot",
       lighting: refreshed.lighting || "Warm volumetric light",

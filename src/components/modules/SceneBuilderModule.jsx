@@ -312,6 +312,9 @@ export function SceneBuilderModule({ project, onUpdateProject, showToast }) {
               <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "8px" }}>
                 <strong>Objektif:</strong> {activeScene.objective}
               </p>
+              <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "8px" }}>
+                <strong>Props / Alatan:</strong> {activeScene.props || "Peralatan babak"}
+              </p>
               <div style={{ fontSize: "0.8rem", color: "#c2410c" }}>
                 <strong>Emosi:</strong> {activeScene.emotion}
               </div>
@@ -439,6 +442,16 @@ export function SceneBuilderModule({ project, onUpdateProject, showToast }) {
                 rows={2}
                 value={editingScene.action}
                 onChange={(e) => setEditingScene({ ...editingScene, action: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Props / Peralatan Babak</label>
+              <input
+                type="text"
+                className="studio-input"
+                value={editingScene.props || ""}
+                onChange={(e) => setEditingScene({ ...editingScene, props: e.target.value })}
               />
             </div>
 
